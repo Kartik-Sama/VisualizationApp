@@ -223,3 +223,37 @@ def surveyViz():
     elif(meta['meta2']['f'] == 'Survey Performance'):
         data2 = surveyPerformance(surveyFilePath, meta['meta2'])        
     return jsonify([data1,data2])
+
+@app.route("/matrix_seriation/<meta_number>", methods=['GET'])
+def matrix_seriation(meta_number):
+    return render_template("matrix_seriation.html", url="/matrix_data/" + meta_number)
+
+
+@app.route("/matrix_data/<meta_number>")
+def matrix_data(meta_number):
+    meta_mapping = {
+        "vis1": meta['meta1'],
+        "vis2": meta['meta2'],
+    }
+    data = surveyPerformance(surveyFilePath, meta_mapping[meta_number])
+    json_data = {
+        "nodes": [],
+        "links": []
+    }
+    dates = data[1]['dates']
+    values = data[2]['data']
+    count = 0
+    for i in range(len(dates)): 
+        for j in range(len(dates)): 
+            json_data["links"].append({
+                "source": i,
+                "target": j,
+                "value": values[count]
+            })
+            count += 1
+        json_data["nodes"].append({
+            "name": dates[i],
+            "group": 1
+        })
+
+    return jsonify(json_data)
