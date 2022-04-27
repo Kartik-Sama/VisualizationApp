@@ -64,7 +64,20 @@ function d3TimeLine(data){
     //d3 category10 scheme used to color categories
     var catCol = d3.scaleOrdinal().domain(columns).range(d3.schemeCategory10);
     // // Add the line
-
+    
+    var xAx = Object.entries(data).map(entry => entry[1]['ActivityDate']);
+    var yAx = Object.entries(data).map(entry => entry[1][col]);
+    
+    for(var i = 0; i < xAx.length; i++) {
+        svg.append("circle")
+            .datum(xAx[i])
+            .attr("cx", x(xAx[i]))
+            .attr("cy", y(yAx[i]))
+            .attr("r",3)
+            .attr("fill",catCol(col))
+            .on("mouseover", dispDate);
+    }
+    // console.log(data['col']);
     var ind = 1;
     for(var col of columns) {
         //The code from below till has been put in loop to draw multiple linegraphs
@@ -90,6 +103,7 @@ function d3TimeLine(data){
         ind += 1;
     }
 }
+
 
 function d3heatMap(data) {
     const metaData = data[0];
