@@ -10,6 +10,8 @@ from dataExtractor import sigLocExtract, surveyPCA, surveyPerformance, scatterPc
 import os
 
 app = Flask(__name__) #create app instance
+app.debug = True
+app.config['DEBUG'] = True
 app.secret_key = 'example' #store this in an environment variable for live apps.
 surveyFilePath = 'input/surveyData/features_'
 sigLocFilePath = 'input/SignificantLocations/features_'
@@ -24,6 +26,7 @@ meta = {"meta1" : {'panelId':'#panel1Viz','f':None,'f_opt':[],'pid':"U1606505063
 "meta2" : {'panelId':'#panel2Viz','f':None,'f_opt':[],'pid':"U7744128165"}}
 
 state = {1:0, 2:0}
+
 
 #homepage
 @app.route('/',methods=['GET','POST'])
@@ -250,3 +253,38 @@ def surveyViz():
     elif(meta['meta2']['f'] == 'Eigen Gap'):
         data2 = eigGap(surveyFilePath, meta['meta2'])
     return jsonify([data1,data2])
+
+@app.route("/matrix_seriation/<meta_number>", methods=['GET'])
+def matrix_seriation(meta_number):
+    return render_template("matrix_seriation.html", url="/matrix_data/" + meta_number)
+
+
+@app.route("/matrix_data/<meta_number>")
+def matrix_data(meta_number):
+    meta_mapping = {
+        "vis1": meta['meta1'],
+        "vis2": meta['meta2'],
+    }
+    data = surveyPerformance(surveyFilePath, meta_mapping[meta_number])
+    json_data = {
+        "nodes": [],
+        "links": []
+    }
+    dates = data[1]['dates']
+    values = data[2]['data']
+    count = 0
+
+    for i in range(len(dates)): 
+        for j in range(len(dates)): 
+            json_data["links"].append({
+                "source": i,
+                "target": j,
+                "value": values[count]
+            })
+            count += 1
+        json_data["nodes"].append({
+            "name": dates[i],
+            "group": 1
+        })
+
+    return jsonify(json_data)

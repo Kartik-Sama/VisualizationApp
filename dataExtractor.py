@@ -71,6 +71,7 @@ def surveyPCA(surveyFilePath, meta):
 def surveyPerformance(surveyFilePath, meta):
     df = pd.read_csv(surveyFilePath+meta['pid']+'.csv')
     df['ActivityDate'] = pd.to_datetime(df['ActivityDate'],dayfirst=True)
+    df.sort_values(by='ActivityDate', inplace=True)
     df['ActivityDate'] = df['ActivityDate'].dt.strftime("%d/%m/%Y")
     #Aggregating features
     if(meta['f_opt'][0] == "Aggregate"):
@@ -79,7 +80,7 @@ def surveyPerformance(surveyFilePath, meta):
         df["sleep"] = (df["sleep1"] +  df["sleep2"] + df["sleep3"])/3
         df["psychosis"] = (df['psychosis1'] + df['psychosis2'] + df['psychosis3'] + df['psychosis4'] + df['psychosis5'])/5
         df["anxiety"] = (df['anxiety1'] + df['anxiety2'] + df['anxiety3'] + df['anxiety4'] + df['anxiety5'] + df['anxiety6'] + df['anxiety7'])/7
-    data = df.drop(columns=["ActivityDate"]).to_numpy()
+    data = df.drop(columns=["ActivityDate","Unnamed: 0"]).to_numpy()
     days = df.shape[0]
     matrixDat = np.zeros((days,days))
     if(meta['f_opt'][1] == "Natural"):
@@ -115,10 +116,10 @@ def surveyPerformance(surveyFilePath, meta):
             matrixDat /= 6.0
             sys.stdout = save_stdout
         except:
-            print("Couldn't convert string to int")
+            print("Couldn't convert string to int")   
     returnData = [{'panelId':meta['panelId']},{'dates':list(df['ActivityDate'].values)},{'data': list(matrixDat.flatten())}]
-    # print("Hi",returnData)
     return returnData            
+
 def scatterPca_1_2(surveyFilePath, meta):
     df = pd.read_csv(surveyFilePath+meta['pid']+'.csv')
     cols = [col for col in df if col.startswith(meta['f_opt'][0])]

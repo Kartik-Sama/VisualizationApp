@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="Comparative Visualization Tool">
+  <meta name="Karthik Sama" content="Vislualization App">
+  <title>Matrix seriation</title>
+
+    
+  <link href="/static/css/main.css" rel="stylesheet">
+  <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.6.4/css/bootstrap-datepicker.css" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css?family=Abel|Nunito" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.6.4/js/bootstrap-datepicker.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+  <style>
+    .background {
+      fill: #eee;
+    }
+
+    line {
+      stroke: #fff;
+    }
+
+    text.active {
+      fill: #0d775e;
+      font-size: 100%;
+    }
+
+    rect.highlight {
+        fill: none;
+        stroke: #0d775e;
+        stroke-width: 2;
+    }
+
+  </style>
+
+  <body>
+    <div class="container-fluid" id="screen">
+
+      <div class="row" style="margin-left: 0px; margin-right: 0px; height: 8%;">
+        <nav class="navbar navbar-dark bg-dark">
+          <div class="container-fluid">
+            <h5 style="color: aliceblue;">Comparative Visualization Tool</h5>
+          </div>
+        </nav>
+      </div>
+      <div class="row" style="margin-left: 0px; margin-right: 0px; height: 92%;">
+        <div class="col-12">
+          <div class="row">
+            <div class="col-12 d-flex justify-content-center" >
+              <h4>Matrix Seriation</h4>
+            </div>
+          </div>
+          <div class="row" style="height: 90%">
+            <div class="col-8" id="seriation"></div>
+            <div class="col-4 justify-content-start">
+              <div class="row">
+                <div class="col-6 justify-content-start">
+                  <div class="form-floating">
+                    <select id="order" class="form-select">
+                      <option value="name">by Date</option>
+                      <option value="count">by Frequency</option>
+                      <option value="group">by Cluster</option>
+                      <option value="leafOrder">by Leaf Order</option>
+                      <option value="leafOrderDist">by Leaf Order over Distance Matrix</option>
+                      <option value="barycenter">by Crossing Reduction</option>
+                      <option value="rcm">by Bandwidth Reduction (RCM)</option>
+                      <option value="spectral">Spectral</option>
+                    </select>
+                    <label for="order" class="form-inline">Order by</label>
+                  </div>
+                </div>
+                <div class="col-6 justify-content-start">
+                  <div class="form-floating">
+                    <select id="distance" class="form-select">
+                      <option value="manhattan" selected="true">Manhattan</option>
+                      <option value="euclidean">Euclidean</option>
+                      <option value="chebyshev">Chebyshev</option>
+                      <option value="hamming">Hamming</option>
+                      <option value="jaccard">Jaccard</option>
+                      <option value="braycurtis">Braycurtis</option>
+                    </select>
+                    <label for="distance" class="form-inline">Distance metric</label>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+  <!-- <aside style="margin-top:80px;">
+  <p>Order: <select id="order">
+    <option value="name">by Name</option>
+    <option value="count">by Frequency</option>
+    <option value="group">by Cluster</option>
+    <option value="leafOrder">by Leaf Order</option>
+    <option value="leafOrderDist">by Leaf Order over Distance Matrix</option>
+    <option value="barycenter">by Crossing Reduction</option>
+    <option value="rcm">by Bandwidth Reduction (RCM)</option>
+    <option value="spectral">Spectral</option>
+  </select>
+
+  <p>Distance: <select id="distance">
+    <option value="manhattan" selected="true">Manhattan</option>
+    <option value="euclidean">Euclidean</option>
+    <option value="chebyshev">Chebyshev</option>
+    <option value="hamming">Hamming</option>
+    <option value="jaccard">Jaccard</option>
+    <option value="braycurtis">Braycurtis</option>
+  </select>
+  </aside> -->
+  <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.2/js/bootstrap.min.js"></script>
+  <script src="https://d3js.org/d3.v3.min.js"></script>
+  <script src="../static/js/matrix_seriation/matrix.js"></script>
+  <script src="../static/js/matrix_seriation/reorder.js"></script>
+  <!-- <script src="https://d3js.org/queue.v1.min.js"></script> -->
+  <!-- <script src="https://d3js.org/d3-scale-chromatic.v0.3.min.js"></script> -->
+  <script src="https://unpkg.com/react@17/umd/react.development.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js" crossorigin></script>
+  <script>
+    const panelId = "#seriation";
+    const displayHeight = document.getElementById(panelId.substring(1)).clientHeight;
+    const displayWidth = document.getElementById(panelId.substring(1)).clientWidth;
+    console.log(displayHeight, displayWidth, Math.min(displayWidth,displayHeight));
+    const width = Math.min(displayWidth,displayHeight)*0.7;
+    const height = width;
+    console.log(width, height)
+    const margin = {top: (displayHeight-height)/2, left: (displayWidth-width)/2};
+    // var margin = {top: 0, right: 0, bottom: 10, left: 0},
+    // width = 720,
+    // height = 720;
+
+    var x = d3.scale.ordinal().rangeBands([0, width]),
+        z = d3.scale.linear().domain([0, 1]).clamp(true),
+    // c = d3.scale.category10().domain(d3.range(10));
+        c = d3.scale.linear().range(["white", "#69b3a2"]).domain([0,1]);
+    var svg = d3.select(panelId).append("svg")
+      .attr("width", displayWidth)
+      .attr("height", displayHeight)
+      // .style("margin-left", -margin.left + "px")
+      .append("g")
+      .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+    console.log("{{url}}")
+    d3.json("{{url}}", loadJson);
+  </script>
+
