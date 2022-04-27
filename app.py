@@ -9,6 +9,8 @@ from os.path import exists
 from dataExtractor import sigLocExtract, surveyPCA, surveyPerformance
 
 app = Flask(__name__) #create app instance
+app.debug = True
+app.config['DEBUG'] = True
 app.secret_key = 'example' #store this in an environment variable for live apps.
 surveyFilePath = 'input/surveyData/features_'
 sigLocFilePath = 'input/SignificantLocations/features_'
@@ -243,6 +245,7 @@ def matrix_data(meta_number):
     dates = data[1]['dates']
     values = data[2]['data']
     count = 0
+
     for i in range(len(dates)): 
         for j in range(len(dates)): 
             json_data["links"].append({

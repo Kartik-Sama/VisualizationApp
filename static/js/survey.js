@@ -186,8 +186,4 @@ function d3heatMap(data) {
       .attr("y",0.9*matrixHeight)
       .text("0")
       .style("font-size",2*cellsize+"px");
-    // .on("mouseover", mouseover)
-    // .on("mousemove", mousemove)
-    // .on("mouseleave", mouseleave)
-    // })
 }

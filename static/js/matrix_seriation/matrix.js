@@ -28,9 +28,9 @@ function matrix(json) {
   // Convert links to matrix; count character occurrences.
   json.links.forEach(function(link) {
     matrix[link.source][link.target].z += link.value;
-    matrix[link.target][link.source].z += link.value;
-    matrix[link.source][link.source].z += link.value;
-    matrix[link.target][link.target].z += link.value;
+    // matrix[link.target][link.source].z += link.value;
+    // matrix[link.source][link.source].z += link.value;
+    // matrix[link.target][link.target].z += link.value;
     nodes[link.source].count += link.value;
     nodes[link.target].count += link.value;
   });
@@ -105,7 +105,7 @@ function matrix(json) {
 
   // Precompute the orders.
     var orders = {
-	name: d3.range(n).sort(function(a, b) { return d3.ascending(nodes[a].name, nodes[b].name); }),
+	name: d3.range(n).sort(function(a, b) { return d3.ascending(nodes[a].index, nodes[b].index); }),
 	count: d3.range(n).sort(function(a, b) { return nodes[b].count - nodes[a].count; }),
 	group: d3.range(n).sort(function(a, b) {
 	    var x = nodes[b].group - nodes[a].group;
@@ -119,6 +119,7 @@ function matrix(json) {
     };
 
   // The default sort order.
+  
   x.domain(orders.name);
 
   svg.append("rect")
@@ -126,11 +127,11 @@ function matrix(json) {
       .attr("width", width)
       .attr("height", height);
 
-  var row = svg.selectAll(".row")
+  var row = svg.selectAll(".rowMat")
       .data(matrix)
     .enter().append("g")
       .attr("id", function(d, i) { return "row"+i; })
-      .attr("class", "row")
+      .attr("class", "rowMat")
       .attr("transform", function(d, i) { return "translate(0," + x(i) + ")"; })
       .each(row);
 
@@ -142,6 +143,7 @@ function matrix(json) {
       .attr("y", x.rangeBand() / 2)
       .attr("dy", ".32em")
       .attr("text-anchor", "end")
+      .attr("font-size", "0.4em")
       .text(function(d, i) { return nodes[i].name; });
 
   var column = svg.selectAll(".column")
@@ -159,6 +161,7 @@ function matrix(json) {
       .attr("y", x.rangeBand() / 2)
       .attr("dy", ".32em")
       .attr("text-anchor", "start")
+      .attr("font-size", "0.4em")
       .text(function(d, i) { return nodes[i].name; });
 
   function row(row) {
@@ -169,16 +172,15 @@ function matrix(json) {
         .attr("x", function(d) { return x(d.x); })
         .attr("width", x.rangeBand())
         .attr("height", x.rangeBand())
-        .style("fill-opacity", function(d) { return z(d.z); })
-        .style("fill", function(d) { return nodes[d.x].group == nodes[d.y].group ? c(nodes[d.x].group) : null; })
+        .style("fill", function(d) { return c(z(d.z)) })
         .on("mouseover", mouseover)
         .on("mouseout", mouseout);
   }
 
   function mouseover(p) {
-    d3.selectAll(".row text").classed("active", function(d, i) { return i == p.y; });
+    d3.selectAll(".rowMat text").classed("active", function(d, i) { return i == p.y; });
     d3.selectAll(".column text").classed("active", function(d, i) { return i == p.x; });
-      d3.select(this).insert("title").text(nodes[p.y].name + "--" + nodes[p.x].name);
+      d3.select(this).insert("title").text(nodes[p.y].name + "-" + nodes[p.x].name);
       d3.select(this.parentElement)
 	  .append("rect")
 	  .attr("class", "highlight")
@@ -211,7 +213,7 @@ function matrix(json) {
 
 	var t = svg.transition().duration(1500);
 
-	t.selectAll(".row")
+	t.selectAll(".rowMat")
             .delay(function(d, i) { return x(i) * 4; })
             .attr("transform", function(d, i) { return "translate(0," + x(i) + ")"; })
 	    .selectAll(".cell")

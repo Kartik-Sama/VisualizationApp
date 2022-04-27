@@ -27,7 +27,6 @@
     <body>
       <div class="container-fluid" id="screen">
         
-        {% block content %}
         <div class="row" style="margin-left: 0px; margin-right: 0px; height: 8%;">
           <nav class="navbar navbar-dark bg-dark">
             <div class="container-fluid">
@@ -35,8 +34,8 @@
             </div>
           </nav>
         </div>
+        {% block content %}
         <div class="row" style="margin-left: 0px; margin-right: 0px; height: 92%;">
-
           <!-- Panel 1 -->
           <div class="col-6 align-self-start panel1 border h-100" id="panel1">
             <div class="row">
