@@ -80,7 +80,7 @@
             <!-- Feature options -->
             <div class="row">
               <div class="col-12 border d-flex justify-content-center">
-                {% if selected['f1'] == 'Survey PCA' %}
+                {% if selected['f1'] == 'Survey PCA' or selected['f1'] == 'Survey PCA Scatter' %}
                   <form method="POST" action="/">
                     <div class="form-check form-check-inline">
                       <label class="form-check-label" for="mood1">Mood</label>
@@ -104,6 +104,19 @@
                     </div>
                     <button type="submit" class="btn btn-primary">Visualize</button>
                 </form>
+                {% elif selected['f1'] == 'Eigen Gap' %}
+                  <form method="POST" action="/">
+                    <div class="form-check form-check-inline">
+                      <label class="form-check-label" for="firstEigenGap1">First Eigen Gap</label>
+                      <input class="form-check-input" type="radio" id="firstEigenGap1" type="checkbox" name="svp1_opt" value="firstEigenGap" {{"checked" if "firstEigenGap" in options['f1_opt']}} />
+                    </div>
+                    <div class="form-check form-check-inline">
+                      <label class="form-check-label" for="secondEigenGap1">Second Eigen Gap</label>
+                      <input class="form-check-input" type="radio" id="secondEigenGap1" type="checkbox" name="svp1_opt" value="secondEigenGap" {{"checked" if "secondEigenGap" in options['f1_opt']}} />      
+                    </div>
+                    <button type="submit" class="btn btn-primary">Visualize</button>
+                </form>
+
                 {% elif selected['f1'] == 'Hometime' or selected['f1'] == 'Significant Location' %}
                   <div class="row">
                     <div class="col-12 d-flex justify-content-center">
@@ -212,7 +225,7 @@
             <!-- Feature options -->
             <div class="row">
               <div class="col-12 border d-flex justify-content-center">
-                {% if selected['f2'] == 'Survey PCA' %}
+                {% if selected['f2'] == 'Survey PCA' or selected['f2'] == 'Survey PCA Scatter' %}
                   <form method="POST" action="/">
                     <div class="form-check form-check-inline">
                     <label class="form-check-label" for="mood2">Mood</label>
@@ -236,6 +249,19 @@
                     </div>
                     <button type="submit" class="btn btn-primary">Visualize</button>
                 </form>
+                {% elif selected['f2'] == 'Eigen Gap' %}
+                <form method="POST" action="/">
+                  <div class="form-check form-check-inline">
+                    <label class="form-check-label" for="firstEigenGap2">First Eigen Gap</label>
+                    <input class="form-check-input" type="radio" id="firstEigenGap2" type="checkbox" name="svp2_opt" value="firstEigenGap" {{"checked" if "firstEigenGap" in options['f2_opt']}} />
+                  </div>
+                  <div class="form-check form-check-inline">
+                    <label class="form-check-label" for="secondEigenGap2">Second Eigen Gap</label>
+                    <input class="form-check-input" type="radio" id="secondEigenGap2" type="checkbox" name="svp2_opt" value="secondEigenGap" {{"checked" if "secondEigenGap" in options['f2_opt']}} />      
+                  </div>
+                  <button type="submit" class="btn btn-primary">Visualize</button>
+              </form>
+
                 {% elif selected['f2'] == 'Hometime' or selected['f2'] == 'Significant Location' %}
                 <div class="row">
                   <div class="col-12 d-flex justify-content-center">
@@ -322,6 +348,8 @@
         <script src="https://d3js.org/d3-scale-chromatic.v0.3.min.js"></script>
         <script src="https://unpkg.com/react@17/umd/react.development.js" crossorigin></script>
         <script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js" crossorigin></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/d3-legend/2.25.6/d3-legend.min.js"></script>
+
         <script>
         var surveyVizUrl = "{{ url_for('surveyViz')}}";
         var sigLocUrl = "{{ url_for('sigLocdata')}}";

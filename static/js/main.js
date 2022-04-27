@@ -10,6 +10,12 @@ function ready(error, state, surData, sigLocData) {
     if(metaData['f'] == 'Survey PCA') {
         d3TimeLine(surData[0]);
     }
+    if(metaData['f'] == 'Survey PCA Scatter') {
+        d3Scatter(surData[0]);
+    }
+    else if(metaData['f'] == 'Eigen Gap') {
+        d3BarChart(surData[0]);
+    }
     else if(metaData['f'] == 'Survey Performance') {
         d3heatMap(surData[0]);
     }
@@ -23,6 +29,12 @@ function ready(error, state, surData, sigLocData) {
     var metaData = state[3]
     if(metaData['f'] == 'Survey PCA') {
         d3TimeLine(surData[1]);
+    }
+    if(metaData['f'] == 'Survey PCA Scatter') {
+        d3Scatter(surData[1]);
+    }
+    else if(metaData['f'] == 'Eigen Gap') {
+        d3BarChart(surData[1]);
     }
     else if(metaData['f'] == 'Survey Performance') {
         d3heatMap(surData[1]);

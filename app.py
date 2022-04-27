@@ -6,7 +6,8 @@ import pandas as pd
 import numpy as np
 import pickle
 from os.path import exists
-from dataExtractor import sigLocExtract, surveyPCA, surveyPerformance
+from dataExtractor import sigLocExtract, surveyPCA, surveyPerformance, scatterPca_1_2, eigGap
+import os
 
 app = Flask(__name__) #create app instance
 app.secret_key = 'example' #store this in an environment variable for live apps.
@@ -14,7 +15,7 @@ surveyFilePath = 'input/surveyData/features_'
 sigLocFilePath = 'input/SignificantLocations/features_'
 
 fileFeatures = {
-    surveyFilePath:['Survey PCA', 'Survey Performance'],
+    surveyFilePath:['Survey PCA', 'Survey Performance', 'Survey PCA Scatter', 'Eigen Gap'],
     sigLocFilePath:['Hometime', 'Significant Location'],
 }
 patientIds = ['U2201583859', 'U7744128165', 'U7331358608', 'U9119126792', 'U4172114993', 'U1954110644', 'U1606505063', 'U1771421483', 'U9938684473', 'U6321806987', 'U5501702863', 'U9864604466', 'U0328336314', 'U8514953341', 'U3826134542', 'U7851221787', 'U2287161257', 'U5342719148', 'U1128597896', 'U1456972679', 'U3600685320']
@@ -45,7 +46,7 @@ def index():
         state[2] = 0
     if(meta['meta1']['f'] == None):
         meta['meta1']['f_opt'] = []
-    elif(meta['meta1']['f'] == 'Survey PCA'):
+    elif(meta['meta1']['f'] == 'Survey PCA' or meta['meta1']['f'] == 'Survey PCA Scatter'):
         optList = request.form.getlist('svp1_opt')
         if (meta['meta1']['f_opt'] == []) and optList == [] or meta['meta1']['f_opt'][0] not in ['mood','anxiety','social','sleep','psychosis']:
             meta['meta1']['f_opt'] = ['mood']
@@ -53,6 +54,15 @@ def index():
             meta['meta1']['f_opt'] = optList
             state[1] = 1
             state[2] = 0
+    elif(meta['meta1']['f'] == 'Eigen Gap'):
+        optList = request.form.getlist('svp1_opt')
+        if (meta['meta1']['f_opt'] == []) and optList == [] or meta['meta1']['f_opt'][0] not in ['firstEigenGap', 'secondEigenGap']:
+            meta['meta1']['f_opt'] = ['firstEigenGap']
+        elif optList != []:
+            meta['meta1']['f_opt'] = optList
+            state[1] = 1
+            state[2] = 0
+        
     elif(meta['meta1']['f'] == 'Survey Performance'):
         optList = request.form.getlist('svPer1')
         if (meta['meta1']['f_opt'] == [] and optList == []) or meta['meta1']['f_opt'][0] not in ['Aggregate','Complete']:
@@ -123,7 +133,7 @@ def index():
         state[2] = 1
     if(meta['meta2']['f'] == None):
         meta['meta2']['f_opt'] = []
-    elif(meta['meta2']['f'] == 'Survey PCA'):
+    elif(meta['meta2']['f'] == 'Survey PCA' or meta['meta2']['f'] == 'Survey PCA Scatter'):
         optList = request.form.getlist('svp2_opt')
         if (meta['meta2']['f_opt'] == [] and optList == []) or meta['meta2']['f_opt'][0] not in ['mood','anxiety','social','sleep','psychosis']:
             meta['meta2']['f_opt'] = ['mood']
@@ -131,6 +141,15 @@ def index():
             meta['meta2']['f_opt'] = optList
             state[1] = 0
             state[2] = 1
+    elif(meta['meta2']['f'] == 'Eigen Gap'):
+        optList = request.form.getlist('svp2_opt')
+        if (meta['meta2']['f_opt'] == [] and optList == []) or meta['meta2']['f_opt'][0] not in ['firstEigenGap', 'secondEigenGap']:
+            meta['meta2']['f_opt'] = ['firstEigenGap']
+        elif optList != []:
+            meta['meta2']['f_opt'] = optList
+            state[1] = 0
+            state[2] = 1
+
     elif(meta['meta2']['f'] == 'Survey Performance'):
         optList = request.form.getlist('svPer2')
         if (meta['meta2']['f_opt'] == [] and optList == []) or meta['meta2']['f_opt'][0] not in ['Aggregate','Complete']:
@@ -217,8 +236,17 @@ def surveyViz():
         data1 = surveyPCA(surveyFilePath, meta['meta1'])
     elif(meta['meta1']['f'] == 'Survey Performance'):
         data1 = surveyPerformance(surveyFilePath, meta['meta1'])
+    elif(meta['meta1']['f'] == 'Survey PCA Scatter'):
+        data1 = scatterPca_1_2(surveyFilePath, meta['meta1'])
+    elif(meta['meta1']['f'] == 'Eigen Gap'):
+        data1 = eigGap(surveyFilePath, meta['meta1'])
+
     if(meta['meta2']['f'] == 'Survey PCA'):
         data2 = surveyPCA(surveyFilePath, meta['meta2'])
     elif(meta['meta2']['f'] == 'Survey Performance'):
         data2 = surveyPerformance(surveyFilePath, meta['meta2'])        
+    elif(meta['meta2']['f'] == 'Survey PCA Scatter'):
+        data2 = scatterPca_1_2(surveyFilePath, meta['meta2'])        
+    elif(meta['meta2']['f'] == 'Eigen Gap'):
+        data2 = eigGap(surveyFilePath, meta['meta2'])
     return jsonify([data1,data2])
