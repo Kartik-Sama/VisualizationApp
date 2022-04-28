@@ -10,6 +10,7 @@ from sklearn.cluster import KMeans
 from sklearn.cluster import MiniBatchKMeans
 from sklearn.cluster import SpectralClustering
 from sklearn.mixture import GaussianMixture
+from sklearn.preprocessing import StandardScaler
 from helperFuncs import co_association_matrix
 import numpy as np
 import sys
@@ -118,3 +119,64 @@ def surveyPerformance(surveyFilePath, meta):
             print("Couldn't convert string to int")   
     returnData = [{'panelId':meta['panelId']},{'dates':list(df['ActivityDate'].values)},{'data': list(matrixDat.flatten())}]
     return returnData            
+
+def scatterPca_1_2(surveyFilePath, meta):
+    df = pd.read_csv(surveyFilePath+meta['pid']+'.csv')
+    cols = [col for col in df if col.startswith(meta['f_opt'][0])]
+    patient_df = df[cols + ['ActivityDate']]
+    cat_df = patient_df[cols + ["ActivityDate"]]
+    
+    pca = PCA(n_components=2)
+    X = cat_df[cols].to_numpy()
+    X_pca = np.absolute(pca.fit_transform(X))
+    pca_cols = pd.DataFrame(X_pca, columns=[meta['f_opt'][0] + '_pca_1', meta['f_opt'][0] + '_pca_2'])
+    pca_df = pd.concat([pca_cols.reset_index(drop=True),patient_df[['ActivityDate']].reset_index(drop=True)], axis=1)
+    
+    returnData = []
+    for idx, row in pca_df.iterrows():
+        dic = {}
+        for column in pca_df.columns:
+            dic[column] = row[column]
+        returnData.append(dic)
+
+    return [{'panelId':meta['panelId']},{'category': meta['f_opt'][0]}, {'data': returnData},]
+
+def getEigGap(features):
+    scaler = StandardScaler()
+    ev, _ = np.linalg.eigh(np.cov(scaler.fit_transform(features), rowvar=False))
+    ev = np.sort(ev)[::-1]
+    return ev[:-1]/ev[1:]
+
+def eigenGapCategory(df, category):
+    cat_cols = [col for col in df if col.startswith(category)]
+
+    cat_df = df[cat_cols + ["ActivityDate"]]
+    
+    return getEigGap(cat_df[cat_cols])
+
+def eigGap(surveyFilePath, meta):
+    df = pd.read_csv(surveyFilePath+meta['pid']+'.csv')
+    cols = [col for col in df if col.startswith('social') or col.startswith('mood') or col.startswith('sleep') or col.startswith('psychosis') or col.startswith('anxiety')]
+    patient_df = df[cols + ['ActivityDate']]
+
+    categories = ['mood', 'social', 'anxiety', 'psychosis', 'sleep']
+    eigen_gaps = [[], []]
+    max_len = 0
+    for category in categories:
+        eg = eigenGapCategory(patient_df, category)
+        max_len = max(max_len, eg.shape[0])
+        eigen_gaps[0].append(eg[0])
+        eigen_gaps[1].append(eg[1])
+
+    retDf = pd.DataFrame(data=eigen_gaps, columns=categories)
+    returnData = []
+    for idx, row in retDf.iterrows():
+        rowVals = []
+        for column in retDf.columns:
+            dic = {}
+            dic['category'] = column
+            dic['eigenGap'] = row[column]
+            rowVals.append(dic)
+        returnData.append(rowVals)
+
+    return [{'panelId':meta['panelId']},{'type': meta['f_opt'][0]}, {'data': returnData},]

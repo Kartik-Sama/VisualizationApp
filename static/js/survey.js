@@ -199,4 +199,209 @@ function d3heatMap(data) {
       .attr("y",0.9*matrixHeight)
       .text("0")
       .style("font-size",2*cellsize+"px");
+    // .on("mouseover", mouseover)
+    // .on("mousemove", mousemove)
+    // .on("mouseleave", mouseleave)
+    // })
+}
+
+function d3Scatter(data) {
+    metadata = Object.entries(data).slice(0,2).map(entry => entry[1]);
+    data = Object.entries(data).slice(2,).map(entry => entry[1])[0].data;
+    
+    for(let i=0; i< data.length; i++) {
+        data[i]['ActivityDay'] = i+1
+    }
+    const panelId = metadata[0]['panelId'];
+    const category = metadata[1]['category'];
+    var displayHeight = document.getElementById(panelId.substring(1)).clientHeight;
+    var displayWidth = document.getElementById(panelId.substring(1)).clientWidth;
+    var width = displayWidth*0.6;
+    var height = displayHeight*0.6;
+    var margin = {top: (displayHeight-height)/2, left: (displayWidth-width)/2};
+    for(var ind of Object.keys(data)) {
+        data[ind].ActivityDate = d3.timeParse("%d/%m/%Y")(data[ind].ActivityDate);
+    }
+    var displayHeight = document.getElementById(panelId.substring(1)).clientHeight;
+    var displayWidth = document.getElementById(panelId.substring(1)).clientWidth;
+    var svg = d3.select(panelId)
+            .append("svg")
+            .attr("width", displayWidth)
+            .attr("height", displayHeight)
+            .append("g")
+            .attr("transform",
+                "translate(" + margin.left + "," + margin.top + ")");
+    
+    // Add X axis --> it is a date format
+    var x = d3.scaleLinear()
+        .domain(d3.extent(data, function(d) { return d[category + '_pca_1']; }))
+        .range([0, width ]);
+
+    svg.append("g")
+        .attr("transform", "translate(0," + height + ")")
+        .call(d3.axisBottom(x));
+
+    // Add Y axis
+    var y = d3.scaleLinear()
+        .domain(d3.extent(data, function(d) { return d[category + '_pca_2']; }))
+        .range([ height, 0 ]);
+    svg.append("g")
+        .call(d3.axisLeft(y));
+
+
+    var color = d3.scaleSequential(d3.interpolateHcl("#60c96e", "#4d4193")).domain([1, data.length+1])
+    //d3 category10 scheme used to color categories
+    // var catCol = d3.scaleOrdinal().domain(columns).range(d3.schemeCategory10);
+    // // Add the line
+
+    var ind = 1;
+        //The code from below till has been put in loop to draw multiple linegraphs
+    // svg.append("path")
+    //     .datum(data)
+    //     .attr("fill", "none")
+    //     .attr("stroke", catCol(col))
+    //     .attr("stroke-width", 1.5)
+    //     .attr("d", d3.line()
+    //     .x(function(d) { return x(d.ActivityDate) })
+    //     .y(function(d) { return y(d[col])}));
+    // svg.append("circle")
+    //     .attr("cx",width-50)
+    //     .attr("cy",20*ind)
+    //     .attr("r",4)
+    //     .style("fill", catCol(col));
+    // svg.append("text")
+    //     .attr("x",width-40)
+    //     .attr("y",20*ind+4) //+radius
+    //     .text(col)
+    //     .style("font-size","15px")
+    //     .attr("alignment-baseline","middle");
+
+    // Add dots
+    svg.append('g')
+    .selectAll("dot")
+    .data(data)
+    .enter()
+    .append("circle")
+        .attr("cx", function (d) { return x(d[category + '_pca_1']); } )
+        .attr("cy", function (d) { return y(d[category + '_pca_2']); } )
+        .attr("r", 3.5)
+        .style("fill", function (d) { return color(d.ActivityDay) } )
+    // console.log(x, y)
+    
+
+    let activityDates = data.map(function(d) { return d.ActivityDate})
+    n = 4
+
+    let keys = []
+    for (let i = 0; i<activityDates.length; i++){
+        if (i % Math.floor(activityDates.length/n+1) == 0)
+            keys.push(activityDates[i])
+    }
+    keys = keys.map(k => String(k).split(' ').slice(1, 4).join('-'))
+    interpolate = d3.interpolateHcl("#60c96e", "#4d4193")
+    colorScale = d3.scaleOrdinal((f = function(){
+        let sampledColors = []
+        for (let i=0; i<1.1; i += 1.1/n) {
+            sampledColors.push(interpolate(i))
+        }
+        return sampledColors
+    })(), keys)
+    // .domain()
+    // .range()
+    
+
+// Add one dot in the legend for each name.
+    svg.selectAll("mydots")
+    .data(keys)
+    .enter()
+    .append("circle")
+        .attr("cx", 100)
+        .attr("cy", function(d,i){ return 100 + i*25}) // 100 is where the first dot appears. 25 is the distance between dots
+        .attr("r", 5)
+        .style("fill", function(d){ return colorScale(d)})
+        .attr("transform",
+        "translate(" + 300 + "," + -100 + ")");
+
+
+    // Add one dot in the legend for each name.
+    svg.selectAll("mylabels")
+    .data(keys)
+    .enter()
+    .append("text")
+        .attr("x", 113)
+        .attr("y", function(d,i){ return 105 + i*25}) // 100 is where the first dot appears. 25 is the distance between dots
+        .style("fill", function(d){ return colorScale(d)})
+        .text(function(d){ return d})
+        .attr("text-anchor", "left")
+        .style("alignment-baseline", "middle")
+        .attr("transform",
+        "translate(" + 300 + "," + -100 + ")");
+
+
+}
+
+function d3BarChart(data) {
+    const metaData = data[0];
+    data = data[1]['type'] == 'firstEigenGap' ? data[2].data[0] : data[2].data[1]
+    const panelId = metaData['panelId']
+    const displayHeight = document.getElementById(panelId.substring(1)).clientHeight;
+    const displayWidth = document.getElementById(panelId.substring(1)).clientWidth;
+    const width = Math.min(displayWidth,displayHeight)*0.7;
+    const height = width;
+    const margin = {top: (displayHeight-height)/2, left: (displayWidth-width)/2};
+    // for(var [ind, val] of dates.entries()) {
+    //     dates[ind] = d3.timeParse("%d/%m/%Y")(val);
+    // }
+    // console.log(data[2]['data']);
+    // // append the svg object to the body of the page
+    var svg = d3.select(panelId)
+    .append("svg")
+    .attr("width", displayWidth)
+    .attr("height", displayHeight)
+    .append("g")
+    .attr("transform",
+        "translate(" + margin.left + "," + margin.top + ")");
+
+    // // Labels of row and columns
+    // // Build X scales and axis:
+    var x = d3.scaleBand()
+    .range([ 0, width ])
+    .domain(data.map(function(d) { return d.category; }))
+    .padding(0.2);
+    svg.append("g")
+    .attr("transform", "translate(0," + height + ")")
+    .call(d3.axisBottom(x))
+    .selectAll("text")
+        .attr("transform", "translate(-10,0)rotate(-45)")
+        .style("text-anchor", "end");
+
+    maxEG = Math.max(...data.map(function(d) { return d.eigenGap; }))
+    
+        // Add Y axis
+    var y = d3.scaleLinear()
+    .domain([0, maxEG])
+    .range([ height, 0]);
+    svg.append("g")
+    .call(d3.axisLeft(y));
+
+    svg.selectAll("mybar")
+    .data(data)
+    .enter()
+    .append("rect")
+        .attr("x", function(d) { return x(d.category); })
+        .attr("width", x.bandwidth())
+        .attr("fill", "#69b3a2")
+        // no bar at the beginning thus:
+        .attr("height", function(d) { return height - y(0); }) // always equal to 0
+        .attr("y", function(d) { return y(0); })
+    
+    // Animation
+    svg.selectAll("rect")
+    .transition()
+    .duration(800)
+    .attr("y", function(d) { return y(d.eigenGap); })
+    .attr("height", function(d) { return height - y(d.eigenGap); })
+    .delay(function(d,i){console.log(i) ; return(i*100)})
+    
+    
 }
