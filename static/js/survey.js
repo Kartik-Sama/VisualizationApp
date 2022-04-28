@@ -74,8 +74,7 @@ function d3TimeLine(data){
             .attr("cx", x(xAx[i]))
             .attr("cy", y(yAx[i]))
             .attr("r",3)
-            .attr("fill",catCol(col))
-            .on("mouseover", dispDate);
+            .attr("fill",catCol(col));
     }
     // console.log(data['col']);
     var ind = 1;
