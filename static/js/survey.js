@@ -68,13 +68,16 @@ function d3TimeLine(data){
     var xAx = Object.entries(data).map(entry => entry[1]['ActivityDate']);
     var yAx = Object.entries(data).map(entry => entry[1][col]);
     
+    const r = 3;
     for(var i = 0; i < xAx.length; i++) {
         svg.append("circle")
-            .datum(xAx[i])
+            .datum([String(xAx[i]).substring(0,15),x(xAx[i])+r,y(yAx[i])-r])
             .attr("cx", x(xAx[i]))
             .attr("cy", y(yAx[i]))
-            .attr("r",3)
-            .attr("fill",catCol(col));
+            .attr("r",r)
+            .attr("fill",catCol(col))
+            .on("mouseover",trendover)
+            .on("mouseout",trendout);
     }
     // console.log(data['col']);
     var ind = 1;
@@ -102,7 +105,6 @@ function d3TimeLine(data){
         ind += 1;
     }
 }
-
 
 function d3heatMap(data) {
     const metaData = data[0];
@@ -199,10 +201,6 @@ function d3heatMap(data) {
       .attr("y",0.9*matrixHeight)
       .text("0")
       .style("font-size",2*cellsize+"px");
-    // .on("mouseover", mouseover)
-    // .on("mousemove", mousemove)
-    // .on("mouseleave", mouseleave)
-    // })
 }
 
 function d3Scatter(data) {
@@ -240,6 +238,12 @@ function d3Scatter(data) {
     svg.append("g")
         .attr("transform", "translate(0," + height + ")")
         .call(d3.axisBottom(x));
+    
+    svg.append("text")
+        .attr("x", width/2)
+        .attr("y",height+40)
+        .style("text-anchor","middle")
+        .text("Principle Component 1")
 
     // Add Y axis
     var y = d3.scaleLinear()
@@ -248,33 +252,16 @@ function d3Scatter(data) {
     svg.append("g")
         .call(d3.axisLeft(y));
 
+    svg.append("text")
+        .attr("transform","rotate(-90)")
+        .attr("x",-height/2)
+        .attr("y",-40)
+        .style("text-anchor","middle")
+        .text("Principle Component 2")
 
     var color = d3.scaleSequential(d3.interpolateHcl("#60c96e", "#4d4193")).domain([1, data.length+1])
-    //d3 category10 scheme used to color categories
-    // var catCol = d3.scaleOrdinal().domain(columns).range(d3.schemeCategory10);
-    // // Add the line
 
     var ind = 1;
-        //The code from below till has been put in loop to draw multiple linegraphs
-    // svg.append("path")
-    //     .datum(data)
-    //     .attr("fill", "none")
-    //     .attr("stroke", catCol(col))
-    //     .attr("stroke-width", 1.5)
-    //     .attr("d", d3.line()
-    //     .x(function(d) { return x(d.ActivityDate) })
-    //     .y(function(d) { return y(d[col])}));
-    // svg.append("circle")
-    //     .attr("cx",width-50)
-    //     .attr("cy",20*ind)
-    //     .attr("r",4)
-    //     .style("fill", catCol(col));
-    // svg.append("text")
-    //     .attr("x",width-40)
-    //     .attr("y",20*ind+4) //+radius
-    //     .text(col)
-    //     .style("font-size","15px")
-    //     .attr("alignment-baseline","middle");
 
     // Add dots
     svg.append('g')
@@ -286,6 +273,7 @@ function d3Scatter(data) {
         .attr("cy", function (d) { return y(d[category + '_pca_2']); } )
         .attr("r", 3.5)
         .style("fill", function (d) { return color(d.ActivityDay) } )
+
     // console.log(x, y)
     
 
@@ -401,7 +389,20 @@ function d3BarChart(data) {
     .duration(800)
     .attr("y", function(d) { return y(d.eigenGap); })
     .attr("height", function(d) { return height - y(d.eigenGap); })
-    .delay(function(d,i){console.log(i) ; return(i*100)})
-    
-    
+    .delay(function(d,i){console.log(i) ; return(i*100)})    
+}
+
+//Helper functions
+function trendover(p) {
+    d3.select(this.parentElement)
+        .append("text")
+        .attr("x",p[1])
+        .attr("y",p[2])
+        .attr("class","hover")
+        .text(p[0])
+        .style("font-size","0.6em")
+}
+
+function trendout(p) {
+    d3.selectAll(".hover").remove();
 }

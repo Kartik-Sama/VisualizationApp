@@ -17,7 +17,7 @@ surveyFilePath = 'input/surveyData/features_'
 sigLocFilePath = 'input/SignificantLocations/features_'
 
 fileFeatures = {
-    surveyFilePath:['Survey PCA', 'Survey Performance', 'Survey PCA Scatter', 'Eigen Gap'],
+    surveyFilePath:['Survey PCA Trend', 'Survey Performance', 'Survey PCA Scatter', 'Eigen Gap'],
     sigLocFilePath:['Hometime', 'Significant Location'],
 }
 patientIds = ['U2201583859', 'U7744128165', 'U7331358608', 'U9119126792', 'U4172114993', 'U1954110644', 'U1606505063', 'U1771421483', 'U9938684473', 'U6321806987', 'U5501702863', 'U9864604466', 'U0328336314', 'U8514953341', 'U3826134542', 'U7851221787', 'U2287161257', 'U5342719148', 'U1128597896', 'U1456972679', 'U3600685320']
@@ -49,7 +49,7 @@ def index():
         state[2] = 0
     if(meta['meta1']['f'] == None):
         meta['meta1']['f_opt'] = []
-    elif(meta['meta1']['f'] == 'Survey PCA' or meta['meta1']['f'] == 'Survey PCA Scatter'):
+    elif(meta['meta1']['f'] == 'Survey PCA Trend' or meta['meta1']['f'] == 'Survey PCA Scatter'):
         optList = request.form.getlist('svp1_opt')
         if (meta['meta1']['f_opt'] == []) and optList == [] or meta['meta1']['f_opt'][0] not in ['mood','anxiety','social','sleep','psychosis']:
             meta['meta1']['f_opt'] = ['mood']
@@ -136,7 +136,7 @@ def index():
         state[2] = 1
     if(meta['meta2']['f'] == None):
         meta['meta2']['f_opt'] = []
-    elif(meta['meta2']['f'] == 'Survey PCA' or meta['meta2']['f'] == 'Survey PCA Scatter'):
+    elif(meta['meta2']['f'] == 'Survey PCA Trend' or meta['meta2']['f'] == 'Survey PCA Scatter'):
         optList = request.form.getlist('svp2_opt')
         if (meta['meta2']['f_opt'] == [] and optList == []) or meta['meta2']['f_opt'][0] not in ['mood','anxiety','social','sleep','psychosis']:
             meta['meta2']['f_opt'] = ['mood']
@@ -233,26 +233,19 @@ def sigLocdata():
 
 @app.route('/surveydata')
 def surveyViz():
-    data1 = []
-    data2 = []
-    if(meta['meta1']['f'] == 'Survey PCA'):
-        data1 = surveyPCA(surveyFilePath, meta['meta1'])
-    elif(meta['meta1']['f'] == 'Survey Performance'):
-        data1 = surveyPerformance(surveyFilePath, meta['meta1'])
-    elif(meta['meta1']['f'] == 'Survey PCA Scatter'):
-        data1 = scatterPca_1_2(surveyFilePath, meta['meta1'])
-    elif(meta['meta1']['f'] == 'Eigen Gap'):
-        data1 = eigGap(surveyFilePath, meta['meta1'])
-
-    if(meta['meta2']['f'] == 'Survey PCA'):
-        data2 = surveyPCA(surveyFilePath, meta['meta2'])
-    elif(meta['meta2']['f'] == 'Survey Performance'):
-        data2 = surveyPerformance(surveyFilePath, meta['meta2'])        
-    elif(meta['meta2']['f'] == 'Survey PCA Scatter'):
-        data2 = scatterPca_1_2(surveyFilePath, meta['meta2'])        
-    elif(meta['meta2']['f'] == 'Eigen Gap'):
-        data2 = eigGap(surveyFilePath, meta['meta2'])
-    return jsonify([data1,data2])
+    data = []
+    for i in range(1,3):
+        curData = []
+        if(meta['meta'+str(i)]['f'] == 'Survey PCA Trend'):
+            curData = surveyPCA(surveyFilePath, meta['meta'+str(i)])
+        elif(meta['meta'+str(i)]['f'] == 'Survey Performance'):
+            curData = surveyPerformance(surveyFilePath, meta['meta'+str(i)])
+        elif(meta['meta'+str(i)]['f'] == 'Survey PCA Scatter'):
+            curData = scatterPca_1_2(surveyFilePath, meta['meta'+str(i)])
+        elif(meta['meta'+str(i)]['f'] == 'Eigen Gap'):
+            curData = eigGap(surveyFilePath, meta['meta'+str(i)])
+        data.append(curData)
+    return jsonify(data)
 
 @app.route("/matrix_seriation/<meta_number>", methods=['GET'])
 def matrix_seriation(meta_number):

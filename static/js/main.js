@@ -5,9 +5,8 @@ queue()
     .await(ready);
 
 function ready(error, state, surData, sigLocData) {
-
     var metaData = state[2]
-    if(metaData['f'] == 'Survey PCA') {
+    if(metaData['f'] == 'Survey PCA Trend') {
         d3TimeLine(surData[0]);
     }
     if(metaData['f'] == 'Survey PCA Scatter') {
@@ -27,7 +26,7 @@ function ready(error, state, surData, sigLocData) {
     }
 
     var metaData = state[3]
-    if(metaData['f'] == 'Survey PCA') {
+    if(metaData['f'] == 'Survey PCA Trend') {
         d3TimeLine(surData[1]);
     }
     if(metaData['f'] == 'Survey PCA Scatter') {
