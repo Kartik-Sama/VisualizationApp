@@ -76,8 +76,8 @@ function d3TimeLine(data){
             .attr("cy", y(yAx[i]))
             .attr("r",r)
             .attr("fill",catCol(col))
-            .on("mouseover",trendover)
-            .on("mouseout",trendout);
+            .on("mouseover",mouseover)
+            .on("mouseout",mouseout);
     }
     // console.log(data['col']);
     var ind = 1;
@@ -262,7 +262,8 @@ function d3Scatter(data) {
     var color = d3.scaleSequential(d3.interpolateHcl("#60c96e", "#4d4193")).domain([1, data.length+1])
 
     var ind = 1;
-
+    const r = 3.5;
+    console.log(data);
     // Add dots
     svg.append('g')
     .selectAll("dot")
@@ -271,8 +272,12 @@ function d3Scatter(data) {
     .append("circle")
         .attr("cx", function (d) { return x(d[category + '_pca_1']); } )
         .attr("cy", function (d) { return y(d[category + '_pca_2']); } )
-        .attr("r", 3.5)
+        .attr("r", r)
         .style("fill", function (d) { return color(d.ActivityDay) } )
+        .datum(function (d) {return [String(d.ActivityDate).substring(0,15), x(d[category + '_pca_1'])+r, y(d[category + '_pca_2'])+r]})
+        .on("mouseover",mouseover)
+        .on("mouseout",mouseout);
+
 
     // console.log(x, y)
     
@@ -294,10 +299,8 @@ function d3Scatter(data) {
         }
         return sampledColors
     })(), keys)
-    // .domain()
-    // .range()
     
-
+    console.log(keys)
 // Add one dot in the legend for each name.
     svg.selectAll("mydots")
     .data(keys)
@@ -308,8 +311,7 @@ function d3Scatter(data) {
         .attr("r", 5)
         .style("fill", function(d){ return colorScale(d)})
         .attr("transform",
-        "translate(" + 300 + "," + -100 + ")");
-
+        "translate(" + 300 + "," + -100 + ")")
 
     // Add one dot in the legend for each name.
     svg.selectAll("mylabels")
@@ -393,7 +395,7 @@ function d3BarChart(data) {
 }
 
 //Helper functions
-function trendover(p) {
+function mouseover(p) {
     d3.select(this.parentElement)
         .append("text")
         .attr("x",p[1])
@@ -403,6 +405,7 @@ function trendover(p) {
         .style("font-size","0.6em")
 }
 
-function trendout(p) {
+
+function mouseout(p) {
     d3.selectAll(".hover").remove();
 }
