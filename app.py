@@ -10,9 +10,7 @@ from dataExtractor import sigLocExtract, surveyPCA, surveyPerformance, scatterPc
 import os
 
 app = Flask(__name__) #create app instance
-app.debug = True
-app.config['DEBUG'] = True
-app.secret_key = 'example' #store this in an environment variable for live apps.
+
 surveyFilePath = 'input/surveyData/features_'
 sigLocFilePath = 'input/SignificantLocations/features_'
 
