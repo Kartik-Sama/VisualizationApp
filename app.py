@@ -6,7 +6,7 @@ import pandas as pd
 import numpy as np
 import pickle
 from os.path import exists
-from dataExtractor import sigLocExtract, surveyPCA, surveyPerformance, scatterPca_1_2, eigGap
+from dataExtractor import sigLocExtract, surveyPCA, surveyPerformance, scatterPca_1_2, eigGap, validIDs
 import os
 
 app = Flask(__name__) #create app instance
@@ -210,7 +210,7 @@ def index():
 
     options = {'f1':p1Features, 'f2':p2Features, 
                'f1_opt':meta['meta1']['f_opt'], 'f2_opt':meta['meta2']['f_opt']}
-    return render_template('base.html',selected=selected,options=options,patientIds=patientIds)
+    return render_template('base.html',selected=selected,options=options,patientIds=validIDs(patientIds, fileFeatures))
 
 @app.route('/render')
 def render():

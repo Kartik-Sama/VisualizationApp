@@ -14,6 +14,17 @@ from sklearn.preprocessing import StandardScaler
 from helperFuncs import co_association_matrix
 import numpy as np
 import sys
+from os.path import exists
+
+def validIDs(ids, features):
+    valid_ids = []
+    for id in ids:
+        for file_loc in features.keys():
+            if(exists(file_loc+id+'.csv')):
+                valid_ids.append(id)
+                break
+    valid_ids.sort()
+    return valid_ids
 
 def sigLocExtract(sigLocFilePath, meta):
     df = pd.read_csv(sigLocFilePath+meta['pid']+'.csv')
